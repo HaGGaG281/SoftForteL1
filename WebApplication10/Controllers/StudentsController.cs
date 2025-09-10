@@ -39,6 +39,14 @@ namespace WebApplication10.Controllers
             return CreatedAtAction(nameof(GetStudentById), student);
         }
 
-       
+        [HttpDelete]
+        public ActionResult DeleteStudent([FromQuery]int id)
+        {
+            var student = students.FirstOrDefault(x => x.Id == id);
+            if (student == null)
+                return NotFound("This student not found by this id");
+            students.Remove(student);
+            return NoContent();
+        }
     }
 }
