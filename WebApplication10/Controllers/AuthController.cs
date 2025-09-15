@@ -84,27 +84,31 @@ namespace WebApplication10.Controllers
 
 
         [HttpGet("courses")]
+        [Authorize(Roles = "Admin")]
+
         public IActionResult GetCourses()
         {
             
             var authHeader = Request.Headers["Authorization"].FirstOrDefault();
 
-            //if (authHeader == null || !authHeader.StartsWith("Bearer "))
-            //    return Unauthorized("Missing or invalid token.");
+            if (authHeader == null || !authHeader.StartsWith("Bearer "))
+                return Unauthorized("Missing or invalid token.");
 
-            //var token = authHeader.Substring("Bearer ".Length).Trim();
-
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(authHeader);
-
-            var role = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            var token = authHeader.Substring("Bearer ".Length).Trim();
+            var role = "";
+            if (token != null)
+            {
+                role = _jwtService.ValidateTokenRole(token);
+            }
+            
+             
 
             if (role == "Admin")
             {
                 return Ok(courses);
             }
 
-            return Forbid("You are not authorized to access courses.");
+            return Unauthorized("You are not authorized to access courses.");
         }
     }
 

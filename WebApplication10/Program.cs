@@ -21,12 +21,13 @@ namespace WebApplication10
             builder.Services.AddSingleton<JwtService>();
 
             // Configure Authentication
-            var secretKey = "MY_SUPER_SECRET_KEY_123456";
+            var secretKey = "5454MY_SUPER_SECRET_KEY_123456798765";
             var issuer = "myApp";
 
 
 
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters

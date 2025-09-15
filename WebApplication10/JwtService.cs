@@ -7,7 +7,7 @@ namespace WebApplication10
 {
     public class JwtService
     {
-        private readonly string _secretKey = "MY_SUPER_SECRET_KEY_123456798765";
+        private readonly string _secretKey = "5454MY_SUPER_SECRET_KEY_123456798765";
         private readonly string _issuer = "myApp";
 
         public string GenerateToken(User user)
@@ -22,15 +22,35 @@ namespace WebApplication10
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
-                issuer: _issuer,
-                audience: _issuer,
-                claims: claims,
-                expires: DateTime.Now.AddHours(1),
-                signingCredentials: creds
-            );
+            var identity = new ClaimsIdentity(claims, "Token");
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = identity,
+                Expires = DateTime.UtcNow.AddHours(1),
+                Issuer = _issuer,
+                Audience = _issuer,
+                SigningCredentials = creds
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var jwt = tokenHandler.WriteToken(token);
+
+            return jwt; 
+        }
+
+        public string ValidateTokenRole(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+
+            var role = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+            if (string.IsNullOrEmpty(role))
+                throw new SecurityTokenException("Invalid token");
+
+            return role;
         }
     }
 }
