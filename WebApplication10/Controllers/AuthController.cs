@@ -72,17 +72,6 @@ namespace WebApplication10.Controllers
                 Role = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value
             });
         }
-
-        // Admin-only endpoint
-        [HttpGet("admin-area")]
-        [Authorize(Roles = "Admin")]
-        public IActionResult AdminArea()
-        {
-            return Ok("Welcome, Admin! ");
-        }
-
-
-
         [HttpGet("courses")]
         [Authorize(Roles = "Admin")]
 

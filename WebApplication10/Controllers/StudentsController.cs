@@ -6,23 +6,49 @@ namespace WebApplication10.Controllers
     [Route("[controller]")] // localhost:port/students
     public class StudentsController : ControllerBase
     {
-       private static List<Student> students = new List<Student>
-       {
+        
+        private readonly JwtService _jwtService;
+        public StudentsController(JwtService jwtService)
+        {
+            _jwtService = jwtService;
+        }
+
+        private static List<Student> students = new List<Student>
+        {
             new Student { Id = 1, Name = "Alice", Age = 20 },
             new Student { Id = 2, Name = "Bob", Age = 22 },
             new Student { Id = 3, Name = "Charlie", Age = 23 }
-       };
+        };
 
        [HttpGet] // GET: localhost:port/students
         public ActionResult<List<Student>> GetAllStudents()
         {
-            return Ok(students);
+            var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+
+            if (authHeader == null || !authHeader.StartsWith("Bearer "))
+                return Unauthorized("Missing or invalid token.");
+
+            var token = authHeader.Substring("Bearer ".Length).Trim();
+            var role = "";
+            if (token != null)
+            {
+                role = _jwtService.ValidateTokenRole(token);
+            }
+
+            if (role == "Admin")
+            {
+                return Ok(students);
+            }
+            return Unauthorized("You are not authorized to access courses.");
+
+
         }
 
 
         [HttpGet("get_student_by_id")] // GET: localhost:port/students
         public ActionResult<Student> GetStudentById([FromQuery]int id)
         {
+
            var student = students.FirstOrDefault(x => x.Id == id);
             if (student == null)
                 return NotFound("This student not found by this id");
